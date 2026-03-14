@@ -1,0 +1,218 @@
+---
+title: "Group 6 Data Analysis"
+format: 
+  html:
+    code-fold: true
+editor: visual
+---
+
+## 1 Introduction
+
+Online movie rating platforms such as IMDB provide valuable insights into audience opinions by collecting user ratings and reviews, which many viewers rely on when choosing what movies to watch (Topal & Ozsoyoglu, 2016).
+
+This analysis aims to investigate which properties of films influence whether they are rated by IMDB as greater than 7 or not. In particular, this analysis examines how factors such as the film's release year, duration, production budget, number of viewer votes and genre are associated with the probability of receiving a high rating.
+
+To investigate this problem, our group first conducted exploratory data analysis to identify potential associations between the variables, and then used a Generalised Linear Model(GLM). Since the response variable indicates whether a film is rated above 7, our group used a binary logistic regression model for the analysis.
+
+## 2 Data Description
+
+The dataset used in this project is dataset06.csv. The dataset contains information of films from the IMDB database and each observation in the dataset represents a single film.
+
+The dataset includes several variables describing film characteristics, including the year of release, film duration, production budget, number of viewer votes and film genre. In addition, the dataset includes the IMDb rating for each film.
+
+Using these variables, our group can investigate the possible correlation between various film attributes and the probability of receiving a rating of 7 or higher.
+
+•film.id – The unique identifier for the film
+
+•year – Year of release of the film in cinemas
+
+•length – Duration (in minutes)
+
+•budget – Budget for the films production (in \$1000000s)
+
+•votes – Number of positive votes received by viewers
+
+•genre – Genre of the film
+
+•rating – IMDB rating from 0-10
+
+```{r}
+data <- read.csv("dataset06.csv")
+
+head(data)
+str(data)
+summary(data)
+```
+
+## 3 Data Cleaning
+
+Before conducting the analysis, several data cleaning steps were performed to prepare the dataset for modelling.
+
+First, observations containing missing values were removed using `na.omit()` to ensure that incomplete records did not affect the analysis.
+
+Next, a binary response variable `high_rating` was created from the original rating variable. Films with ratings greater than 7 were coded as 1, while films with ratings of 7 or below were coded as 0.
+
+Finally, the number of votes was log-transformed to reduce skewness and improve the interpretability of the variable.
+
+The cleaned dataset was saved as `Group_6_Data_1.csv`, which is used in the subsequent analysis and modelling steps.
+
+```{r}
+df <- read.csv("dataset06.csv")
+
+# remove missing values
+df <- na.omit(df)
+
+# create binary response variable
+df$high_rating <- ifelse(df$rating > 7,1,0)
+
+# log transform votes
+df$log_votes <- log(df$votes)
+
+table(df$genre)
+table(df$high_rating)
+```
+
+
+## 4 Exploratory Data Analysis
+
+To explore the relationships between film characteristics and the likelihood of receiving a rating greater than 7, several exploratory visualisations were produced using the cleaned dataset.
+
+
+```{r}
+library(ggplot2)
+
+ggplot(df, aes(x = genre, fill = factor(high_rating))) + 
+  geom_bar(position = "fill") + 
+  labs(title = "Proportion of High Rating by Genre", 
+       x = "Genre", y = "Proportion", fill = "Rating > 7") +
+  theme_minimal()
+```
+
+The bar plot shows the proportion of films with ratings above and below 7 across different genres.
+
+Short films and documentaries have the highest proportions of high-rated films, followed by animation and comedy. In contrast, drama and romance show very low proportions of films rated above 7. Action films also show a relatively low proportion of high-rated films.
+
+This suggests that genre may be associated with the likelihood of a film receiving a high IMDb rating.
+
+```{r}
+ggplot(df, aes(x = log_votes, fill = factor(high_rating))) + 
+  geom_histogram(bins = 30, alpha = 0.7) + 
+  labs(title = "Log(Votes) by Rating Group",
+       x = "log(Votes)", fill = "Rating > 7") +
+  theme_minimal()
+```
+
+The histogram shows the distribution of the log-transformed number of votes for films with rating over and below 7.
+
+For both groups, most films fall within the lower ranges of log(votes), indicating that regardless of their ratings, only a small number of films received a very high number of votes, most films received a moderate number of votes.
+
+Although the red bars (ratings ≤ 7) are consistently higher than the blue bars (ratings > 7), this does not mean that lower-rated films are more likely to receive more votes. 
+
+First, films rated above 7 appear to account for a smaller share of the overall dataset. So the taller red bars are results of the difference in total group sizes.
+
+Second, the distributions of the two groups overlap substantially, both extending from approximately log(Votes) ≈ 2 to over 10. This suggests that the number of votes does not strongly distinguish between high-rated and low-rated films.
+
+
+```{r}
+ggplot(df, aes(x = factor(high_rating), y = length, fill = factor(high_rating))) +
+  geom_boxplot() +
+  scale_x_discrete(labels = c("0" = "Rating ≤ 7", "1" = "Rating > 7")) +
+  labs(title = "Film Length by Rating Group", 
+       x = "Rating Group", 
+       y = "Length (mins)") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+The boxplot compares the distribution of film length between films with ratings above 7 and those with ratings of 7 or below. 
+
+The median film length of lower-rated films appears slightly higher than the highly rated films. 
+
+In addition, the distribution of film length among highly rated films appears more variable, with a wider spread of values. 
+
+Several longer films are also observed among the lower-rated group as outliers. 
+
+Overall, the boxplot suggests that film length may be associated with rating, although the relationship does not appear to be very strong.
+
+## 5 Model (GLM)
+
+To examine how film properties influence the probability of receiving a rating above 7, a logistic regression model was fitted. Since the response variable high_rating is binary, a GLM with a binomial family and logit link was used.
+
+### 5.1 Model specification
+
+Since the response variable `high_rating` is binary, a logistic regression model is used. Let $p_i$ denote the probability that film $i$ receives a rating above 7.
+
+The model assumes
+
+$$
+Y_i \sim \text{Binomial}(1, p_i)
+$$
+
+and uses the logit link function as Model 1.
+
+Model 1 includes the predictors: year, length, log_votes, and budget.
+
+$$
+\log\left(\frac{p_i}{1-p_i}\right)
+=
+\beta_0
++
+\beta_1 year_i
++
+\beta_2 length_i
++
+\beta_3 log\_votes_i
++
+\beta_4 budget_i
+$$
+
+Model 2 additionally includes the categorical variable `genre`.
+
+### 5.2 Model fitting
+
+The two models were fitted in R as follows.
+
+```{r}
+model1 <- glm(high_rating ~ year + length + log_votes + budget,
+              family = binomial(link = "logit"),
+              data = df)
+
+model2 <- glm(high_rating ~ year + length + log_votes + budget + genre,
+              family = binomial(link = "logit"),
+              data = df)
+
+```
+
+### 5.3 Model comparison
+The two models were compared using the Akaike Information Criterion (AIC). 
+
+```{r}
+AIC(model1, model2)
+```
+
+A lower AIC indicates a better model fit.
+
+Model 2 has a considerably lower AIC than Model 1, suggesting that the inclusion of `genre` improves the fit of the model.
+
+### 5.4 Selected model
+
+Based on the AIC comparison, Model 2 was selected as the final model for interpretation. 
+
+Model 2 provides a much better fit to the dataset, indicating that genre contributes important additional information when predicting whether a film receives a rating above 7.
+
+
+## 6 Results
+
+```{r}
+summary(model2)
+```
+
+## 7 Discussion
+
+Summarise findings, limitations, and possible improvements here.
+
+## 8 References
+
+-   K. Topal and G. Ozsoyoglu, "Movie review analysis: Emotion analysis of IMDb movie reviews," 2016 IEEE/ACM International Conference on Advances in Social Networks Analysis and Mining (ASONAM), San Francisco, CA, USA, 2016, pp. 1170-1176, doi: 10.1109/ASONAM.2016.7752387.
+
+## 
