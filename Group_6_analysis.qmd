@@ -72,11 +72,9 @@ table(df$genre)
 table(df$high_rating)
 ```
 
-
 ## 4 Exploratory Data Analysis
 
 To explore the relationships between film characteristics and the likelihood of receiving a rating greater than 7, several exploratory visualisations were produced using the cleaned dataset.
-
 
 ```{r}
 library(ggplot2)
@@ -106,12 +104,11 @@ The histogram shows the distribution of the log-transformed number of votes for 
 
 For both groups, most films fall within the lower ranges of log(votes), indicating that regardless of their ratings, only a small number of films received a very high number of votes, most films received a moderate number of votes.
 
-Although the red bars (ratings ≤ 7) are consistently higher than the blue bars (ratings > 7), this does not mean that lower-rated films are more likely to receive more votes. 
+Although the red bars (ratings ≤ 7) are consistently higher than the blue bars (ratings \> 7), this does not mean that lower-rated films are more likely to receive more votes.
 
 First, films rated above 7 appear to account for a smaller share of the overall dataset. So the taller red bars are results of the difference in total group sizes.
 
 Second, the distributions of the two groups overlap substantially, both extending from approximately log(Votes) ≈ 2 to over 10. This suggests that the number of votes does not strongly distinguish between high-rated and low-rated films.
-
 
 ```{r}
 ggplot(df, aes(x = factor(high_rating), y = length, fill = factor(high_rating))) +
@@ -124,13 +121,13 @@ ggplot(df, aes(x = factor(high_rating), y = length, fill = factor(high_rating)))
   theme(legend.position = "none")
 ```
 
-The boxplot compares the distribution of film length between films with ratings above 7 and those with ratings of 7 or below. 
+The boxplot compares the distribution of film length between films with ratings above 7 and those with ratings of 7 or below.
 
-The median film length of lower-rated films appears slightly higher than the highly rated films. 
+The median film length of lower-rated films appears slightly higher than the highly rated films.
 
-In addition, the distribution of film length among highly rated films appears more variable, with a wider spread of values. 
+In addition, the distribution of film length among highly rated films appears more variable, with a wider spread of values.
 
-Several longer films are also observed among the lower-rated group as outliers. 
+Several longer films are also observed among the lower-rated group as outliers.
 
 Overall, the boxplot suggests that film length may be associated with rating, although the relationship does not appear to be very strong.
 
@@ -184,7 +181,8 @@ model2 <- glm(high_rating ~ year + length + log_votes + budget + genre,
 ```
 
 ### 5.3 Model comparison
-The two models were compared using the Akaike Information Criterion (AIC). 
+
+The two models were compared using the Akaike Information Criterion (AIC).
 
 ```{r}
 AIC(model1, model2)
@@ -196,10 +194,9 @@ Model 2 has a considerably lower AIC than Model 1, suggesting that the inclusion
 
 ### 5.4 Selected model
 
-Based on the AIC comparison, Model 2 was selected as the final model for interpretation. 
+Based on the AIC comparison, Model 2 was selected as the final model for interpretation.
 
 Model 2 provides a much better fit to the dataset, indicating that genre contributes important additional information when predicting whether a film receives a rating above 7.
-
 
 ## 6 Results
 
@@ -207,9 +204,43 @@ Model 2 provides a much better fit to the dataset, indicating that genre contrib
 summary(model2)
 ```
 
+Model 2, which includes `genre` as an additional predictor, provides a substantially better fit than Model 1, with a much lower AIC (969.91 compared with 1594.81). This indicates that genre plays an important role in explaining whether a film receives an IMDb rating above 7.
+
+From the fitted logistic regression model, several predictors are statistically significant.
+
+The coefficient for `year` is positive and statistically significant (p = 0.00879), suggesting that more recently released films are slightly more likely to receive a rating above 7, holding other variables constant.
+
+The coefficient for `length` is negative and highly statistically significant (p \< 0.001), indicating that longer films are less likely to receive a high rating.
+
+The coefficient for `budget` is positive and highly statistically significant (p \< 0.001), implying that films with larger production budgets are more likely to achieve ratings above 7.
+
+In contrast, `log_votes` is not statistically significant (p = 0.8506), indicating that after controlling for the other variables, the number of votes does not meaningfully affect the probability of a high rating.
+
+For the categorical variable `genre`, Action is the reference category. Relative to Action films, Comedy, Documentary, and Short films have significantly higher odds of receiving a rating above 7 (all p \< 0.01), while Drama films have significantly lower odds (p \< 0.001). Animation and Romance are not significantly different from Action films at the 5% significance level.
+
+Overall, the results show that `genre`, `budget`, `length`, and `year` are important determinants of high IMDb ratings, while `log_votes` is not significant in the presence of the other variables.
+
 ## 7 Discussion
 
-Summarise findings, limitations, and possible improvements here.
+This study investigated which film characteristics influence whether a film receives an IMDb rating above 7 using a logistic regression model.
+
+The results demonstrate that `genre` is one of the most important factors. Films such as Documentary, Comedy, and Short are significantly more likely to receive high ratings compared to Action films, while Drama films are less likely to achieve high ratings. This suggests that audience preferences and evaluation standards vary across genres.
+
+The analysis also shows that `budget` has a strong positive effect, indicating that higher-budget films are more likely to receive high ratings. This may be because larger budgets allow for better production quality, stronger marketing, and wider distribution.
+
+In addition, `length` has a negative effect, suggesting that longer films are less likely to receive ratings above 7. This may indicate that shorter films are more engaging or easier for audiences to evaluate positively.
+
+Although the number of votes might be expected to reflect popularity, `log_votes` is not statistically significant in the model. This suggests that the number of votes alone does not determine whether a film receives a high rating once other factors are taken into account.
+
+The effect of `year` is positive but relatively small, indicating that more recent films are slightly more likely to receive higher ratings.
+
+### Limitations
+
+There are several limitations to this analysis. First, the dataset does not include potentially important variables such as director, cast, awards, or marketing, which may influence film ratings. Second, the model assumes linear relationships between predictors and the log-odds of a high rating, which may oversimplify real-world relationships. Finally, this analysis is based on observational data and cannot establish causal relationships.
+
+### Conclusion
+
+In conclusion, this analysis shows that `genre`, `budget`, `length`, and `year` significantly influence whether a film receives an IMDb rating above 7. Among these, genre appears to be the most important factor. These findings provide useful insights for understanding the characteristics associated with highly rated films.
 
 ## 8 References
 
