@@ -150,7 +150,7 @@ ggplot(df, aes(x = factor(high_rating), y = length, fill = factor(high_rating)))
   theme(legend.position = "none")
 ```
 
-As shown in Figure @fig-length, the distribution of film length differs slightly between films with ratings above 7 and those with ratings of 7 or below.
+As shown in @fig-length, the distribution of film length differs slightly between films with ratings above 7 and those with ratings of 7 or below.
 
 The median film length of lower-rated films appears slightly higher than the highly rated films.
 
@@ -194,8 +194,7 @@ $$
 \beta_4 budget_i
 $$
 
-Model 2 additionally includes the categorical variable `genre`.
-$$
+Model 2 additionally includes the categorical variable `genre`. $$
 \log\left(\frac{p_i}{1-p_i}\right)
 =
 \beta_0
@@ -321,4 +320,4 @@ In conclusion, this analysis shows that `genre`, `budget`, `length`, and `year` 
 
 -   K. Topal and G. Ozsoyoglu, "Movie review analysis: Emotion analysis of IMDb movie reviews," 2016 IEEE/ACM International Conference on Advances in Social Networks Analysis and Mining (ASONAM), San Francisco, CA, USA, 2016, pp. 1170-1176, doi: 10.1109/ASONAM.2016.7752387.
 
-#
+# 
