@@ -253,12 +253,31 @@ As shown in @tbl-aic, Model 2 provides a better fit.
 Model 2 has a considerably lower AIC than Model 1, suggesting that the inclusion of `genre` improves the fit of the model.
 
 ## 5.4 Selected model
+#| label: Model 2
+#| tbl-cap: "Model 2: Distribution of Predicted Probabilities."
+#| echo: false
+```{r}
+df$predicted_prob <- predict(model2, type = "response")
 
+ggplot(df, aes(x = predicted_prob, fill = factor(high_rating))) +
+  geom_histogram(bins = 30, alpha = 0.7, position = "identity") +
+  labs(
+    title = "Model 2: Distribution of Predicted Probabilities",
+    x = "Predicted Probability (Rating > 7)",
+    y = "Count",
+    fill = "Actual Rating > 7"
+  ) +
+  scale_fill_manual(values = c("0" = "lightcoral", "1" = "steelblue"),
+                    labels = c("0" = "No (Rating ≤ 7)", "1" = "Yes (Rating > 7)")) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    legend.position = "bottom"
+  ) 
+```
 To further assess the models, the deviance values were also examined. The null deviance for Model 2 was 2327.27, while the residual deviance was reduced to 947.91. This substantial reduction indicates that the predictors included in the model explain a considerable amount of variation in whether a film receives a rating above 7.
 
 In addition, the large improvement in AIC from Model 1 to Model 2 suggests that `genre` contributes important explanatory information beyond the continuous predictors alone. Therefore, genre should be retained in the final model.
-
-## 5.5 Selected model
 
 Based on the AIC comparison and the reduction in deviance, Model 2 was selected as the final model for interpretation. This model provides a better representation of the factors associated with high IMDb ratings and is therefore used in the Results section.
 
