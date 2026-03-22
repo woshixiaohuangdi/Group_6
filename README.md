@@ -5,7 +5,7 @@ dataset06
 Group_6_analysis.html
 Group_6_analysis.html
 # Group members
-Yuning Jia 3085988J/n
+Yuning Jia 3085988J\n
 Danni Weng 3075242W
 Jingyuan Niu 3154267
 Ruidong Li 3107776L
